@@ -2,11 +2,14 @@
 
 This package lets you quickly pick strings from ad hoc menus. Just like a frog
 would catch a fly. The menu is built "on the fly" from a collection of
-strings. It's presented to the user to choose one of them. One example where
-this kind of menu is useful are spelling correction suggestions:
+strings. It's presented to the user to choose one of them by pressing a single
+key. One example where this kind of menu is useful are spelling correction
+suggestions:
 
 [[./images/spellcheck.png]]
 
+The user can specify a prompt and additional action keys as you can see in the
+bottom of the menu.
 
 * Example
 
