@@ -253,7 +253,7 @@ PROMPT and ACTIONS are the arguments of `frog-menu-read'."
       (let ((fill-column (1+ (funcall frog-menu-grid-width-function))))
         (fill-region header-pos (point))
         (align-regexp header-pos (point) "\\(\\s-*\\) " 1 1 nil)
-        (while (re-search-backward "_" nil t)
+        (while (re-search-backward "_" header-pos t)
           (replace-match " "))))
     (goto-char (point-min))
     ;; one more for the avy char
