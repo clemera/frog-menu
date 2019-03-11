@@ -10,12 +10,12 @@ this kind of menu is useful are spelling correction suggestions:
 
 * Example
 
-To invoke the menu users can call `frog-menu-read'. How items are displayed
-and choosen depends on `frog-menu-type'. The default type `avy-posframe' uses
+To invoke the menu users can call =frog-menu-read=. How items are displayed
+and choosen depends on =frog-menu-type=. The default type =avy-posframe= uses
 `avy' and `posframe'. Their handler functions can be used as reference if you
-want to define a new `frog-menu-type'.
+want to define a new =frog-menu-type=.
 
-Here is an example how you could use `frog-menu-read' to implement a
+Here is an example how you could use =frog-menu-read= to implement a
 `flyspell-correct-interface':
 
 #+begin_src elisp
