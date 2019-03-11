@@ -286,8 +286,8 @@ Returns candidates to be handled by query handler."
 W is the window where the candidates can be found and defaults to
 the currently selected one. B is the buffer of the candidates and
 defaults to the current one. START and END are the buffer
-positions containing the candidates and default to point-min and
-point-max."
+positions containing the candidates and default to ‘point-min’ and
+‘point-max’."
   (let ((w (or w (selected-window)))
         (b (or b (current-buffer)))
         (candidates ()))
