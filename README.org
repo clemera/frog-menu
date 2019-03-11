@@ -15,8 +15,15 @@ and choosen depends on =frog-menu-type=. The default type =avy-posframe= uses
 [[https://github.com/abo-abo/avy][avy]] and [[https://github.com/tumashu/posframe][posframe]]. Their handler functions can be used as reference if you want
 to define a new =frog-menu-type=.
 
-Here is an example how you could use =frog-menu-read= to implement a
-[[https://github.com/d12frosted/flyspell-correct][flyspell-correct-interface]]:
+Here is an example how you would invoke a frog menu:
+
+#+begin_src elisp
+(frog-menu-read "Choose a string"
+                '("a" "list" "of strings"))
+#+end_src
+
+It is also possible to define additional action keys. Here is an example how
+you could use =frog-menu-read= to implement a [[https://github.com/d12frosted/flyspell-correct][flyspell-correct-interface]]:
 
 #+begin_src elisp
 (require 'flyspell-correct)
