@@ -141,8 +141,12 @@ Less columns are used automatically if the grid width is not big
 enough to contain that many columns."
   :type 'function)
 
-(defcustom frog-menu-avy-keys (append (number-sequence ?a ?z)
-                                      (number-sequence ?A ?Z)
+(defcustom frog-menu-avy-keys (append (string-to-list "asdflkjgh")
+                                      (string-to-list "qwerpoiuty")
+                                      (string-to-list "zxcvmnb")
+                                      (string-to-list (upcase "asdflkjgh"))
+                                      (string-to-list (upcase "qwerpoiuty"))
+                                      (string-to-list (upcase "zxcvmnb"))
                                       (number-sequence ?, ?@))
   "Frog menu keys used for `avy-keys'.
 
