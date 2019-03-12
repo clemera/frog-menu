@@ -127,7 +127,9 @@ value. If the user exited the query return nil."
   '((avy-posframe . posframe-hide))
   "Maps `frog-menu-type' to a cleanup handler.
 
-The cleanup handler receives the displayed buffer as argument."
+The cleanup handler receives the displayed buffer as argument and
+is called after the query handler returns or exits through an
+error."
   :type '(alist :key-type symbol
                 :value-type function))
 
