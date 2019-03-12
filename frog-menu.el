@@ -79,7 +79,11 @@ When defining a new menu type, handlers need to be added for
 
 `frog-menu-display-handler-alist'
 
-`frog-menu-query-handler-alist'."
+`frog-menu-query-handler-alist'
+
+and optionally to
+
+`frog-menu-cleanup-handler-alist'."
   :type 'symbol)
 
 
@@ -116,6 +120,14 @@ display handler. The second one is the actions argument passed to
 
 This function should return the chosen string or action return
 value. If the user exited the query return nil."
+  :type '(alist :key-type symbol
+                :value-type function))
+
+(defcustom frog-menu-cleanup-handler-alist
+  '((avy-posframe . posframe-hide))
+  "Maps `frog-menu-type' to a cleanup handler.
+
+The cleanup handler receives the displayed buffer as argument."
   :type '(alist :key-type symbol
                 :value-type function))
 
@@ -364,7 +376,6 @@ gets hidden after the query."
          (pos (avy--process
                candidates
                (avy--style-fn avy-style))))
-    (posframe-hide buffer)
     (cond ((number-or-marker-p pos)
            ;; string
            (with-current-buffer buffer
@@ -408,7 +419,13 @@ RETURN will be the returned value if KEY is pressed."
          (candidates (funcall dhandler buf))
          (qhandler (cdr (assq frog-menu-type
                               frog-menu-query-handler-alist)))
-         (res (funcall qhandler candidates actions buf)))
+         (cuhandler (cdr (assq frog-menu-type
+                               frog-menu-cleanup-handler-alist)))
+         (res nil))
+    (unwind-protect
+        (setq res (funcall qhandler candidates actions buf))
+      (when cuhandler
+        (funcall cuhandler buf)))
     res))
 
 
