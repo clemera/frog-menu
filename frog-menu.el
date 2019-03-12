@@ -192,7 +192,13 @@ ACTIONS."
     (funcall frog-menu-grid-column-function)
     (funcall frog-menu-grid-width-function)))
   (insert "\n\n")
-  (insert (frog-menu--prompt-format prompt actions)))
+  (insert (frog-menu--prompt-format prompt actions))
+  ;; padding for avy char
+  (goto-char (point-min))
+  (while (not (eobp))
+    (goto-char (line-end-position))
+    (insert " ")
+    (forward-line 1)))
 
 
 ;; * Formatting
@@ -256,11 +262,6 @@ PROMPT and ACTIONS are the arguments of `frog-menu-read'."
         (while (re-search-backward "_" header-pos t)
           (replace-match " "))))
     (goto-char (point-min))
-    ;; one more for the avy char
-    (while (not (eobp))
-      (goto-char (line-end-position))
-      (insert " ")
-      (forward-line 1))
     (buffer-string)))
 
 ;; * Display
