@@ -11,7 +11,7 @@ suggestions:
 The user can specify a prompt and additional action keys as you can see in the
 bottom of the menu.
 
-Inspired by [[https://github.com/mrkkrp/avy-menu][avy-menu]].
+Inspired by [[https://github.com/mrkkrp/ace-popup-menu][ace-popup-menu]].
 
 * Example
 
