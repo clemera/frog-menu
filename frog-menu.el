@@ -374,7 +374,7 @@ gets hidden after the query."
   (frog-menu--init-avy-action-map actions)
   (if candidates
       (let* ((avy-keys frog-menu-avy-keys)
-             (avy-single-candidate-jump nil)
+             (avy-single-candidate-jump (null actions))
              (avy-handler-function #'frog-menu--posframe-ace-handler)
              (avy-pre-action #'ignore)
              (avy-all-windows nil)
