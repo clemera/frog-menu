@@ -213,7 +213,10 @@ ACTIONS."
   (while (not (eobp))
     (goto-char (line-end-position))
     (insert " ")
-    (forward-line 1)))
+    (forward-line 1))
+  ;; posframe needs point at start,
+  ;; otherwise it fails on first init
+  (goto-char (point-min)))
 
 
 ;; * Formatting
