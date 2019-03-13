@@ -200,12 +200,13 @@ PROMPT, STRINGS and ACTIONS are the args from `frog-menu-read'.
 
 Fills the buffer with a grid of STRINGS followed by PROMPT and
 ACTIONS."
-  (insert
-   (frog-menu--grid-format
-    strings
-    (funcall frog-menu-grid-column-function)
-    (funcall frog-menu-grid-width-function)))
-  (insert "\n\n")
+  (when strings
+    (insert
+     (frog-menu--grid-format
+      strings
+      (funcall frog-menu-grid-column-function)
+      (funcall frog-menu-grid-width-function)))
+    (insert "\n\n"))
   (insert (frog-menu--prompt-format prompt actions))
   ;; padding for avy char
   (goto-char (point-min))
@@ -313,7 +314,9 @@ positions containing the candidates and default to ‘point-min’ and
           (save-restriction
             (narrow-to-region start end)
             (goto-char (point-min))
-            (push (cons (point) w) candidates)
+            (when (eq (get-char-property (point) 'face)
+                      'frog-menu-candidate-face)
+              (push (cons (point) w) candidates))
             (goto-char
              (or (next-single-property-change
                   (point) 'face)
@@ -369,25 +372,30 @@ argument of `frog-menu-read'. BUFFER is the menu buffer which
 gets hidden after the query."
   ;; uses a global keymap var to pass info to avy handler
   (frog-menu--init-avy-action-map actions)
-  (let* ((avy-keys frog-menu-avy-keys)
-         (avy-handler-function #'frog-menu--posframe-ace-handler)
-         (avy-pre-action #'ignore)
-         (avy-all-windows nil)
-         (avy-style 'pre)
-         (avy-action #'identity)
-         (pos (avy--process
-               candidates
-               (avy--style-fn avy-style))))
-    (cond ((number-or-marker-p pos)
-           ;; string
-           (with-current-buffer buffer
-             (let* ((start pos)
-                    (end (or (next-single-property-change start 'face)
-                             (point-max))))
-               (buffer-substring start end))))
-          ((commandp pos)
-           ;; action
-           (call-interactively pos)))))
+  (if candidates
+      (let* ((avy-keys frog-menu-avy-keys)
+             (avy-single-candidate-jump nil)
+             (avy-handler-function #'frog-menu--posframe-ace-handler)
+             (avy-pre-action #'ignore)
+             (avy-all-windows nil)
+             (avy-style 'pre)
+             (avy-action #'identity)
+             (pos (avy--process
+                   candidates
+                   (avy--style-fn avy-style))))
+        (cond ((number-or-marker-p pos)
+               ;; string
+               (with-current-buffer buffer
+                 (let* ((start pos)
+                        (end (or (next-single-property-change start 'face)
+                                 (point-max))))
+                   (buffer-substring start end))))
+              ((commandp pos)
+               ;; action
+               (call-interactively pos))))
+    (let ((cmd (lookup-key frog-menu--avy-action-map (vector (read-char)))))
+      (when (commandp cmd)
+        (call-interactively cmd)))))
 
 
 ;; * Entry point
