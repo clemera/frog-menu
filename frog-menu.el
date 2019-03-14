@@ -91,10 +91,11 @@ and optionally to
   '((avy-posframe . frog-menu-init-avy-posframe))
   "Maps `frog-menu-type' to an init handler.
 
-The init handler is called with prompt, strings and actions
-arguments of `frog-menu-read'. It should initialize the buffer for
-display and return it. Afterwards the hook
-`frog-menu-after-init-hook' gets executed."
+The init handler is called with the prompt, strings formatted by
+`frog-menu-format-strings-function' actions formatted by
+`frog-menu-format-actions-function'. It should initialize the
+display buffer (which is current when called). After init the
+hook `frog-menu-after-init-hook' gets executed."
   :type '(alist :key-type symbol
                 :value-type function))
 
@@ -103,8 +104,7 @@ display and return it. Afterwards the hook
   "Maps `frog-menu-type' to a display handler.
 
 The display handler receives the buffer to display as an argument
-and should return the candidates to pass as first argument to the
-query handler."
+and should return the window of the displayed buffer."
   :type '(alist :key-type symbol
                 :value-type function))
 
@@ -112,11 +112,11 @@ query handler."
   '((avy-posframe . frog-menu-avy-posframe))
   "Maps `frog-menu-type' to a query handler.
 
-The query handler receives two arguments.
+The query handler receives four arguments.
 
-The first are the candidates passed from the return value of the
-display handler. The second one is the actions argument passed to
-`frog-menu-read'.
+The first is the displayed buffer. The second the window where
+the buffer is displayed. The last one is the actions argument
+passed to `frog-menu-read'.
 
 This function should return the chosen string or action return
 value. If the user exited the query return nil."
@@ -124,12 +124,12 @@ value. If the user exited the query return nil."
                 :value-type function))
 
 (defcustom frog-menu-cleanup-handler-alist
-  '((avy-posframe . posframe-hide))
+  '((avy-posframe . frog-menu-posframe-hide))
   "Maps `frog-menu-type' to a cleanup handler.
 
-The cleanup handler receives the displayed buffer as argument and
-is called after the query handler returns or exits through an
-error."
+The cleanup handler receives the displayed buffer and the window
+as arguments and is called after the query handler returns or
+exits through an error."
   :type '(alist :key-type symbol
                 :value-type function))
 
@@ -140,9 +140,19 @@ Runs after menu buffer is initialized by its init handler. The
 menu buffer is set current when this hook runs."
   :type '(repeat function))
 
+(defcustom frog-menu-format-strings-function #'frog-menu-grid-format
+  "Function used to format the strings passed to `frog-menu-read'."
+  :type 'function)
+
+(defcustom frog-menu-format-actions-function #'frog-menu-action-format
+  "Function used to format the actions passed to `frog-menu-read'."
+  :type 'function)
+
 (defcustom frog-menu-grid-width-function
   (lambda () (/ (frame-width) 2))
-  "Returns the width that should be used for menu grid."
+  "Returns the width that should be used for menu grid.
+
+Used by `frog-menu-grid-format'."
   :type 'function)
 
 (defcustom frog-menu-grid-column-function
@@ -152,7 +162,9 @@ menu buffer is set current when this hook runs."
   "Returns the number of columns for the menu grid.
 
 Less columns are used automatically if the grid width is not big
-enough to contain that many columns."
+enough to contain that many columns.
+
+Used by `frog-menu-grid-format'."
   :type 'function)
 
 (defcustom frog-menu-avy-keys (append (string-to-list "asdflkjgh")
@@ -181,45 +193,78 @@ be drawn by single characters."
 
 ;; * Init
 
-(defun frog-menu--init-buffer (prompt strings actions)
-  "Initialize the menu buffer and return it.
+(defun frog-menu--init-buffer (buffer prompt strings actions)
+  "Initialize the menu BUFFER and return it.
 
-PROMPT STRINGS and ACTIONS are the args from `frog-menu-read'."
-  (with-current-buffer (get-buffer-create frog-menu--buffer)
+PROMPT, STRINGS and ACTIONS are the args from `frog-menu-read'."
+  (with-current-buffer buffer
     (erase-buffer)
-    (funcall (cdr (assq frog-menu-type
-                        frog-menu-init-handler-alist))
-             prompt strings actions)
-    (run-hooks 'frog-menu-after-init-hook)
-    (get-buffer frog-menu--buffer)))
+    (let ((formats (and strings
+                        (funcall frog-menu-format-strings-function
+                                 strings)))
+          (formata (and actions
+                        (funcall frog-menu-format-actions-function
+                                 actions))))
+      (funcall (cdr (assq frog-menu-type
+                          frog-menu-init-handler-alist))
+               prompt
+               formats
+               formata)
+      (run-hooks 'frog-menu-after-init-hook)
+      buffer)))
 
-(defun frog-menu-init-avy-posframe (prompt strings actions)
+(defun frog-menu-posframe-hide (buf _window)
+  "Hide the posframe buffer BUF."
+  (posframe-hide buf))
+
+(defun frog-menu-init-avy-posframe (prompt formatted-strings formatted-actions)
   "Init handler for avy-posframe.
 
-PROMPT, STRINGS and ACTIONS are the args from `frog-menu-read'.
+PROMPT, FORMATTED-STRINGS and FORMATTED-ACTIONS are the args from `frog-menu-read'.
 
-Fills the buffer with a grid of STRINGS followed by PROMPT and
+Fills the buffer with a grid of FORMATTED-STRINGS followed by PROMPT and
 ACTIONS."
-  (when strings
-    (insert
-     (frog-menu--grid-format
-      strings
-      (funcall frog-menu-grid-column-function)
-      (funcall frog-menu-grid-width-function)))
+  (when formatted-strings
+    (insert formatted-strings)
     (insert "\n\n"))
-  (insert (frog-menu--prompt-format prompt actions))
-  ;; padding for avy char
-  (goto-char (point-min))
-  (while (not (eobp))
-    (goto-char (line-end-position))
-    (insert " ")
-    (forward-line 1))
+  (insert prompt "\n")
+  (insert formatted-actions)
+  (when formatted-strings
+      ;; padding for avy char
+    (goto-char (point-min))
+    (while (not (eobp))
+      (goto-char (line-end-position))
+      (insert " ")
+      (forward-line 1)))
   ;; posframe needs point at start,
   ;; otherwise it fails on first init
   (goto-char (point-min)))
 
 
 ;; * Formatting
+
+(defun frog-menu-grid-format (strings)
+  (frog-menu--grid-format
+   strings
+   (funcall frog-menu-grid-column-function)
+   (funcall frog-menu-grid-width-function)))
+
+(defun frog-menu-action-format (actions)
+  (with-temp-buffer
+    (let ((header-pos (point)))
+      (dolist (action actions)
+        (insert (car action)
+                "_"
+                (replace-regexp-in-string " " "_" (cadr action))
+                " "))
+      (insert "\n")
+      (let ((fill-column (1+ (funcall frog-menu-grid-width-function))))
+        (fill-region header-pos (point))
+        (align-regexp header-pos (point) "\\(\\s-*\\) " 1 1 nil)
+        (while (re-search-backward "_" header-pos t)
+          (replace-match " "))))
+    (goto-char (point-min))
+    (buffer-string)))
 
 (defun frog-menu--grid-format (strings cols &optional width)
   "Return grid string built with STRINGS.
@@ -261,26 +306,6 @@ Returns the buffer containing the formatted grid."
       (buffer-string))))
 
 
-(defun frog-menu--prompt-format (prompt actions)
-  "Return string containing formatted PROMPT and ACTIONS.
-
-PROMPT and ACTIONS are the arguments of `frog-menu-read'."
-  (with-temp-buffer
-    (insert prompt "\n")
-    (let ((header-pos (point)))
-      (dolist (action actions)
-        (insert (car action)
-                "_"
-                (replace-regexp-in-string " " "_" (cadr action))
-                " "))
-      (insert "\n")
-      (let ((fill-column (1+ (funcall frog-menu-grid-width-function))))
-        (fill-region header-pos (point))
-        (align-regexp header-pos (point) "\\(\\s-*\\) " 1 1 nil)
-        (while (re-search-backward "_" header-pos t)
-          (replace-match " "))))
-    (goto-char (point-min))
-    (buffer-string)))
 
 ;; * Display
 
@@ -294,19 +319,17 @@ Returns candidates to be handled by query handler."
   (set-face-attribute 'internal-border
                       (buffer-local-value 'posframe--frame buf)
                       :inherit 'frog-menu-border)
-  (frog-menu--get-avy-candidates
-   (frame-selected-window
-    (buffer-local-value 'posframe--frame buf))
-   buf))
+  (frame-selected-window
+   (buffer-local-value 'posframe--frame buf)))
 
-(defun frog-menu--get-avy-candidates (&optional w b start end)
+(defun frog-menu--get-avy-candidates (&optional b w start end)
   "Return candidates to be passed to `avy--process'.
 
-W is the window where the candidates can be found and defaults to
-the currently selected one. B is the buffer of the candidates and
-defaults to the current one. START and END are the buffer
-positions containing the candidates and default to ‘point-min’ and
-‘point-max’."
+B is the buffer of the candidates and defaults to the current
+one. W is the window where the candidates can be found and
+defaults to the currently selected one. START and END are the
+buffer positions containing the candidates and default to
+‘point-min’ and ‘point-max’."
   (let ((w (or w (selected-window)))
         (b (or b (current-buffer)))
         (candidates ()))
@@ -367,38 +390,40 @@ action result. ACTIONS is the argument of `frog-menu-read'."
     (define-key frog-menu--avy-action-map (kbd (car action))
       (lambda () (interactive) (car (cddr action))))))
 
-(defun frog-menu-avy-posframe (candidates actions buffer)
+(defun frog-menu-avy-posframe (buffer window actions)
   "Query handler for avy-posframe.
 
 CANDIDATES are the candidates for `avy--process'. ACTIONS is the
 argument of `frog-menu-read'. BUFFER is the menu buffer which
 gets hidden after the query."
-  ;; uses a global keymap var to pass info to avy handler
-  (frog-menu--init-avy-action-map actions)
-  (if candidates
-      (let* ((avy-keys frog-menu-avy-keys)
-             (avy-single-candidate-jump (null actions))
-             (avy-handler-function #'frog-menu--posframe-ace-handler)
-             (avy-pre-action #'ignore)
-             (avy-all-windows nil)
-             (avy-style 'pre)
-             (avy-action #'identity)
-             (pos (avy--process
-                   candidates
-                   (avy--style-fn avy-style))))
-        (cond ((number-or-marker-p pos)
-               ;; string
-               (with-current-buffer buffer
-                 (let* ((start pos)
-                        (end (or (next-single-property-change start 'face)
-                                 (point-max))))
-                   (buffer-substring start end))))
-              ((commandp pos)
-               ;; action
-               (call-interactively pos))))
-    (let ((cmd (lookup-key frog-menu--avy-action-map (vector (read-char)))))
-      (when (commandp cmd)
-        (call-interactively cmd)))))
+  (let ((candidates (frog-menu--get-avy-candidates
+                     buffer window)))
+    ;; init map which passes actions info to avy handler
+    (frog-menu--init-avy-action-map actions)
+    (if candidates
+        (let* ((avy-keys frog-menu-avy-keys)
+               (avy-single-candidate-jump (null actions))
+               (avy-handler-function #'frog-menu--posframe-ace-handler)
+               (avy-pre-action #'ignore)
+               (avy-all-windows nil)
+               (avy-style 'pre)
+               (avy-action #'identity)
+               (pos (avy--process
+                     candidates
+                     (avy--style-fn avy-style))))
+          (cond ((number-or-marker-p pos)
+                 ;; string
+                 (with-current-buffer buffer
+                   (let* ((start pos)
+                          (end (or (next-single-property-change start 'face)
+                                   (point-max))))
+                     (buffer-substring start end))))
+                ((commandp pos)
+                 ;; action
+                 (call-interactively pos))))
+      (let ((cmd (lookup-key frog-menu--avy-action-map (vector (read-char)))))
+        (when (commandp cmd)
+          (call-interactively cmd))))))
 
 
 ;; * Entry point
@@ -426,19 +451,20 @@ DESCRIPTION is a string to be displayed along with KEY to
 describe the action.
 
 RETURN will be the returned value if KEY is pressed."
-  (let* ((buf (frog-menu--init-buffer prompt strings actions))
+  (let* ((buf (frog-menu--init-buffer (get-buffer-create frog-menu--buffer)
+                                      prompt strings actions))
          (dhandler (cdr (assq frog-menu-type
                               frog-menu-display-handler-alist)))
-         (candidates (funcall dhandler buf))
+         (window (funcall dhandler buf))
          (qhandler (cdr (assq frog-menu-type
                               frog-menu-query-handler-alist)))
          (cuhandler (cdr (assq frog-menu-type
                                frog-menu-cleanup-handler-alist)))
          (res nil))
     (unwind-protect
-        (setq res (funcall qhandler candidates actions buf))
+        (setq res (funcall qhandler buf window actions))
       (when cuhandler
-        (funcall cuhandler buf)))
+        (funcall cuhandler buf window)))
     res))
 
 
