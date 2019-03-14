@@ -86,6 +86,12 @@ and optionally to
 `frog-menu-cleanup-handler-alist'."
   :type 'symbol)
 
+(defcustom frog-menu-after-init-hook '()
+  "Frog menu init hook.
+
+Runs after menu buffer is initialized by its init handler. The
+menu buffer is set current when this hook runs."
+  :type '(repeat function))
 
 (defcustom frog-menu-init-handler-alist
   '((avy-posframe . frog-menu-init-avy-posframe))
@@ -133,19 +139,12 @@ exits through an error."
   :type '(alist :key-type symbol
                 :value-type function))
 
-(defcustom frog-menu-after-init-hook '()
-  "Frog menu init hook.
-
-Runs after menu buffer is initialized by its init handler. The
-menu buffer is set current when this hook runs."
-  :type '(repeat function))
+(defcustom frog-menu-format-actions-function #'frog-menu-action-format
+  "Function used to format the actions passed to `frog-menu-read'."
+  :type 'function)
 
 (defcustom frog-menu-format-strings-function #'frog-menu-grid-format
   "Function used to format the strings passed to `frog-menu-read'."
-  :type 'function)
-
-(defcustom frog-menu-format-actions-function #'frog-menu-action-format
-  "Function used to format the actions passed to `frog-menu-read'."
   :type 'function)
 
 (defcustom frog-menu-grid-width-function
@@ -182,11 +181,15 @@ be drawn by single characters."
 
 (defface frog-menu-border '((((background dark))  . (:background "white"))
                             (((background light)) . (:background "black")))
-  "The border color for the posframe.")
+  "The face defining the border for the posframe.")
 
-(defface frog-menu-candidate-face
+(defface frog-menu-candidates-face
   '((t (:inherit default)))
   "Face used for menu candidates.")
+
+(defface frog-menu-actions-face
+  '((t (:inherit default)))
+  "Face used for menu actions.")
 
 (defvar frog-menu--buffer " *frog-menu-menu*"
   "Buffer used for the frog menu.")
@@ -253,10 +256,16 @@ ACTIONS."
   (with-temp-buffer
     (let ((header-pos (point)))
       (dolist (action actions)
-        (insert (car action)
-                "_"
-                (replace-regexp-in-string " " "_" (cadr action))
-                " "))
+        (add-text-properties
+         (point)
+         (progn
+           (insert (car action)
+                   "_"
+                   (replace-regexp-in-string " " "_"
+                                             (cadr action))
+                   " ")
+           (point))
+         '(face frog-menu-actions-face)))
       (insert "\n")
       (let ((fill-column (1+ (funcall frog-menu-grid-width-function))))
         (fill-region header-pos (point))
@@ -300,11 +309,10 @@ Returns the buffer containing the formatted grid."
             (add-text-properties (point)
                                  (progn (insert str)
                                         (point))
-                                 '(face frog-menu-candidate-face))
+                                 '(face frog-menu-candidates-face))
             (setq column (+ column
                             (* colwidth (ceiling length colwidth)))))))
       (buffer-string))))
-
 
 
 ;; * Display
@@ -312,7 +320,7 @@ Returns the buffer containing the formatted grid."
 (defun frog-menu-display-posframe (buf)
   "Display posframe showing buffer BUF.
 
-Returns candidates to be handled by query handler."
+Returns window of displayed buffer."
   (posframe-show buf
                  :poshandler #'posframe-poshandler-point-bottom-left-corner
                  :internal-border-width 1)
@@ -321,6 +329,7 @@ Returns candidates to be handled by query handler."
                       :inherit 'frog-menu-border)
   (frame-selected-window
    (buffer-local-value 'posframe--frame buf)))
+
 
 (defun frog-menu--get-avy-candidates (&optional b w start end)
   "Return candidates to be passed to `avy--process'.
@@ -341,14 +350,17 @@ buffer positions containing the candidates and default to
             (narrow-to-region start end)
             (goto-char (point-min))
             (when (eq (get-char-property (point) 'face)
-                      'frog-menu-candidate-face)
+                      'frog-menu-candidates-face)
               (push (cons (point) w) candidates))
             (goto-char
              (or (next-single-property-change
                   (point) 'face)
                  (point-max)))
             (while (< (point) (point-max))
-              (unless (looking-at "[[:blank:]\r\n]\\|\\'")
+              (unless (or (looking-at "[[:blank:]\r\n]\\|\\'")
+                          (not (eq (get-char-property (point) 'face)
+                                   'frog-menu-candidates-face)))
+
                 (push (cons (point) w)
                       candidates))
               (goto-char
