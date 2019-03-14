@@ -183,6 +183,10 @@ be drawn by single characters."
                             (((background light)) . (:background "black")))
   "The face defining the border for the posframe.")
 
+(defface frog-menu-prompt-face
+  '((t (:inherit default)))
+  "Face used for menu promp")
+
 (defface frog-menu-candidates-face
   '((t (:inherit default)))
   "Face used for menu candidates.")
@@ -230,7 +234,13 @@ ACTIONS."
   (when formatted-strings
     (insert formatted-strings)
     (insert "\n\n"))
-  (insert prompt "\n")
+  (add-text-properties
+   (point)
+   (progn
+     (insert prompt)
+     (point))
+   '(face frog-menu-prompt-face))
+  (insert "\n")
   (insert formatted-actions)
   (when formatted-strings
       ;; padding for avy char
