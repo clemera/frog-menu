@@ -173,7 +173,7 @@ exits through an error."
   (lambda () (cond ((eq frog-menu-type 'avy-posframe)
                     (/ (frame-width) 2))
                    ((eq frog-menu-type 'avy-side-window)
-                    (frame-width))
+                    (* 2 (/ (frame-width) 3)))
                    (t (frame-width))))
   "Returns the width that should be used for menu grid.
 
