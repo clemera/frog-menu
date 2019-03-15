@@ -16,9 +16,12 @@ Inspired by [[https://github.com/mrkkrp/ace-popup-menu][ace-popup-menu]].
 * Example
 
 To invoke the menu users can call =frog-menu-read=. How items are displayed
-and choosen depends on =frog-menu-type=. The default type =avy-posframe= uses
-[[https://github.com/abo-abo/avy][avy]] and [[https://github.com/tumashu/posframe][posframe]]. Their handler functions can be used as reference if you want
-to define a new =frog-menu-type=.
+and choosen depends on =frog-menu-type=. For graphical displays the type
+=avy-posframe= uses [[https://github.com/abo-abo/avy][avy]] and [[https://github.com/tumashu/posframe][posframe]].
+
+In terminals the type =avy-side-window= is used. The default type handler
+functions can be used as reference if you want to define a new
+=frog-menu-type=.
 
 Here is an example how you would invoke a frog menu:
 
