@@ -61,3 +61,7 @@ of (command . word) to be used by `flyspell-do-correct'."
 
 (setq flyspell-correct-interface #'frog-menu-flyspell-correct)
 #+end_src
+
+Afterwards calling =M-x flyspell-correct-wrapper= will prompt you with a
+=frog-menu=.
+
