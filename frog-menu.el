@@ -280,7 +280,8 @@ ACTIONS."
      (point))
    '(face frog-menu-prompt-face))
   (insert "\n")
-  (insert formatted-actions)
+  (when formatted-actions
+    (insert formatted-actions))
   (when formatted-strings
       ;; padding for avy char
     (goto-char (point-min))
@@ -302,27 +303,27 @@ ACTIONS."
    (funcall frog-menu-grid-width-function)))
 
 (defun frog-menu-action-format (actions)
-  (with-temp-buffer
-    (let ((header-pos (point)))
-      (dolist (action actions)
-        (add-text-properties
-         (point)
-         (progn
-           (insert (car action)
-                   "_"
-                   (replace-regexp-in-string " " "_"
-                                             (cadr action))
-                   " ")
-           (point))
-         '(face frog-menu-actions-face)))
-      (insert "\n")
-      (let ((fill-column (1+ (funcall frog-menu-grid-width-function))))
-        (fill-region header-pos (point))
-        (align-regexp header-pos (point) "\\(\\s-*\\) " 1 1 nil)
-        (while (re-search-backward "_" header-pos t)
-          (replace-match " "))))
-    (goto-char (point-min))
-    (buffer-string)))
+  (when actions
+    (with-temp-buffer
+      (let ((header-pos (point)))
+        (dolist (action actions)
+          (add-text-properties
+           (point)
+           (progn
+             (insert (car action)
+                     "_"
+                     (replace-regexp-in-string " " "_"
+                                               (cadr action))
+                     " ")
+             (point))
+           '(face frog-menu-actions-face)))
+        (insert "\n")
+        (let ((fill-column (1+ (funcall frog-menu-grid-width-function))))
+          (fill-region header-pos (point))
+          (align-regexp header-pos (point) "\\(\\s-*\\) " 1 1 nil)
+          (while (re-search-backward "_" header-pos t)
+            (replace-match " "))))
+      (buffer-string))))
 
 (defun frog-menu--grid-format (strings cols &optional width)
   "Return grid string built with STRINGS.
