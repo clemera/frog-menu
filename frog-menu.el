@@ -170,7 +170,11 @@ exits through an error."
   :type 'function)
 
 (defcustom frog-menu-grid-width-function
-  (lambda () (/ (frame-width) 2))
+  (lambda () (cond ((eq frog-menu-type 'avy-posframe)
+                    (/ (frame-width) 2))
+                   ((eq frog-menu-type 'avy-side-window)
+                    (frame-width))
+                   (t (frame-width))))
   "Returns the width that should be used for menu grid.
 
 Used by `frog-menu-grid-format'."
