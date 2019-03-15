@@ -189,7 +189,7 @@ Used by `frog-menu-grid-format'."
 Less columns are used automatically if the grid width is not big
 enough to contain that many columns.
 
-Used by `frog-menu-grid-format'."
+Used by `frog-menu-grid-format' and `frog-menu-action-format'."
   :type 'function)
 
 (defcustom frog-menu-avy-keys (append (string-to-list "asdflkjgh")
