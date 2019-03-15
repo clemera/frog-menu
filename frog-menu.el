@@ -128,7 +128,7 @@ and should return the window of the displayed buffer."
 (defcustom frog-menu-display-option-alist
   '((avy-posframe . posframe-poshandler-point-bottom-left-corner)
     (avy-side-window . (display-buffer-in-side-window (side . bottom))))
-  "Maps `frog-menu-type' to a display options.
+  "Maps `frog-menu-type' to a display option.
 
 The display option is passed to the display handler as second argument."
   :type '(alist :key-type symbol
