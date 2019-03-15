@@ -9,7 +9,10 @@ suggestions:
 [[./images/spellcheck.png]]
 
 The user can specify a prompt and additional action keys as you can see in the
-bottom of the menu.
+bottom of the menu. Usage in the terminal is also supported:
+
+[[./images/spellcheck2.png]]
+
 
 Inspired by [[https://github.com/mrkkrp/ace-popup-menu][ace-popup-menu]].
 
