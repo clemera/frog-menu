@@ -161,6 +161,10 @@ exits through an error."
   :type '(alist :key-type symbol
                 :value-type function))
 
+(defcustom frog-menu-avy-padding nil
+  "If non-nil use padding between avy hints and candidates."
+  :type 'boolean)
+
 (defcustom frog-menu-format-actions-function #'frog-menu-action-format
   "Function used to format the actions passed to `frog-menu-read'."
   :type 'function)
@@ -168,6 +172,10 @@ exits through an error."
 (defcustom frog-menu-format-strings-function #'frog-menu-grid-format
   "Function used to format the strings passed to `frog-menu-read'."
   :type 'function)
+
+(defcustom frog-menu-min-col-padding 2
+  "Minimal padding between columns of grid."
+  :type 'integer)
 
 (defcustom frog-menu-grid-width-function
   (lambda () (cond ((eq frog-menu-type 'avy-posframe)
@@ -287,7 +295,8 @@ ACTIONS."
     (goto-char (point-min))
     (while (not (eobp))
       (goto-char (line-end-position))
-      (insert " ")
+      ;; Fix: assumes only one avy char...
+      (insert (concat " " (if frog-menu-avy-padding " " "")))
       (forward-line 1)))
   ;; posframe needs point at start,
   ;; otherwise it fails on first init
@@ -297,10 +306,10 @@ ACTIONS."
 ;; * Formatting
 
 (defun frog-menu-grid-format (strings)
-  (frog-menu--grid-format
-   strings
-   (funcall frog-menu-grid-column-function)
-   (funcall frog-menu-grid-width-function)))
+    (frog-menu--grid-format
+     strings
+     (funcall frog-menu-grid-column-function)
+     (funcall frog-menu-grid-width-function)))
 
 (defun frog-menu-action-format (actions)
   (when actions
@@ -337,7 +346,7 @@ Returns the buffer containing the formatted grid."
     (let* ((length (apply 'max
                           (mapcar #'string-width strings)))
            (wwidth (or width (frame-width)))
-           (columns (min cols (/ wwidth (+ 2 length))))
+           (columns (min cols (/ wwidth (+ frog-menu-min-col-padding length))))
            (colwidth (/ wwidth columns))
            (column 0)
            (first t)
@@ -478,6 +487,29 @@ action result. ACTIONS is the argument of `frog-menu-read'."
     (define-key frog-menu--avy-action-map (kbd (car action))
       (lambda () (interactive) (car (cddr action))))))
 
+(defun frog-menu--avy-style (path leaf)
+  "Create an overlay with PATH at LEAF.
+PATH is a list of keys from tree root to LEAF.
+LEAF is normally ((BEG . END) . WND)."
+  (let* ((path (mapcar #'avy--key-to-char path))
+         (str (propertize (apply #'string (reverse path))
+                          'face 'avy-lead-face)))
+    (when (or avy-highlight-first (> (length str) 1))
+      (set-text-properties 0 1 '(face avy-lead-face-0) str))
+    (setq str (concat
+               (propertize avy-current-path
+                           'face 'avy-lead-face-1)
+               str))
+    (avy--overlay
+     str
+     (avy-candidate-beg leaf) nil
+     (avy-candidate-wnd leaf)
+     (lambda (str old-str)
+       (concat str
+               (if frog-menu-avy-padding " " "")
+               old-str)))))
+
+
 (defun frog-menu-query-with-avy (buffer window actions)
   "Query handler for avy-posframe.
 
@@ -498,7 +530,7 @@ gets hidden after the query."
                (avy-action #'identity)
                (pos (avy--process
                      candidates
-                     (avy--style-fn avy-style))))
+                      #'frog-menu--avy-style)))
           (cond ((number-or-marker-p pos)
                  ;; string
                  (with-current-buffer buffer
