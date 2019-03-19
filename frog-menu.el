@@ -229,6 +229,14 @@ be drawn by single characters."
   '((t (:inherit default)))
   "Face used for menu actions.")
 
+(defface frog-menu-action-keybinding-face
+  '((t (:inherit default)))
+  "Face used for menu action keybindings.")
+
+(defface frog-menu-posframe-background-face
+  '((t (:inherit default)))
+  "Face used for the background color of the posframe.")
+
 (defvar frog-menu--buffer " *frog-menu-menu*"
   "Buffer used for the frog menu.")
 
@@ -319,8 +327,13 @@ ACTIONS."
           (add-text-properties
            (point)
            (progn
-             (insert (car action)
-                     "_"
+             (insert (car action))
+             (point))
+           '(face frog-menu-action-keybinding-face))
+          (add-text-properties
+           (point)
+           (progn
+             (insert "_"
                      (replace-regexp-in-string " " "_"
                                                (cadr action))
                      " ")
@@ -383,7 +396,8 @@ Returns window of displayed buffer."
   (posframe-show buf
                  :poshandler(or display-option
                                 #'posframe-poshandler-point-bottom-left-corner)
-                 :internal-border-width 1)
+                 :internal-border-width 1
+                 :background-color (face-attribute 'frog-menu-posframe-background-face :background))
   (set-face-attribute 'internal-border
                       (buffer-local-value 'posframe--frame buf)
                       :inherit 'frog-menu-border)
