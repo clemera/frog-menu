@@ -4,7 +4,7 @@
 
 ;; Author: Clemens Radermacher <clemera@posteo.net>
 ;; URL: https://github.com/clemera/frog-menu
-;; Version: 0.1.1
+;; Version: 0.2
 ;; Package-Requires: ((emacs "26") (avy) (posframe))
 ;; Keywords: convenience
 
