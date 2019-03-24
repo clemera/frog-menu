@@ -498,9 +498,7 @@ buffer positions containing the candidates and default to
         ((mouse-event-p char)
          (signal 'user-error (list "Mouse event not handled" char)))
         (t
-         (require 'edmacro)
-         ;; FIXME: Why not `key-description'?
-         (let* ((key (kbd (edmacro-format-keys (vector char))))
+         (let* ((key (kbd (key-description (vector char))))
                 (cmd (lookup-key frog-menu--avy-action-map key)))
            (if (commandp cmd)
                (throw 'done (list (list cmd)))
