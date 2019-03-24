@@ -90,9 +90,9 @@ By default types `avy-posframe' and `avy-side-window' are possible.
   `frog-menu-cleanup-handler-alist'.")
 
 (defcustom frog-menu-type-function #'frog-menu-type
-  "Function which should return the `frog-menu-type' to be used.
+  "Function which should return the variable `frog-menu-type' to be used.
 
-See `frog-menu-type'"
+See variable `frog-menu-type'"
   :type 'function)
 
 (defcustom frog-menu-after-init-hook '()
@@ -105,7 +105,7 @@ menu buffer is set current when this hook runs."
 (defcustom frog-menu-init-handler-alist
   '((avy-posframe . frog-menu-init-display-buffer)
     (avy-side-window . frog-menu-init-display-buffer))
-  "Maps `frog-menu-type' to an init handler.
+  "Maps variable `frog-menu-type' to an init handler.
 
 The init handler is called with the prompt, strings formatted by
 `frog-menu-format-strings-function' actions formatted by
@@ -118,7 +118,7 @@ hook `frog-menu-after-init-hook' gets executed."
 (defcustom frog-menu-display-handler-alist
   '((avy-posframe . frog-menu-display-posframe)
     (avy-side-window . frog-menu-display-side-window))
-  "Maps `frog-menu-type' to a display handler.
+  "Maps variable `frog-menu-type' to a display handler.
 
 The display handler receives the buffer to display as an argument
 and should return the window of the displayed buffer."
@@ -128,7 +128,7 @@ and should return the window of the displayed buffer."
 (defcustom frog-menu-display-option-alist
   '((avy-posframe . posframe-poshandler-point-bottom-left-corner)
     (avy-side-window . (display-buffer-in-side-window (side . bottom))))
-  "Maps `frog-menu-type' to a display option.
+  "Maps variable `frog-menu-type' to a display option.
 
 The display option is passed to the display handler as second argument."
   :type '(alist :key-type symbol
@@ -137,7 +137,7 @@ The display option is passed to the display handler as second argument."
 (defcustom frog-menu-query-handler-alist
   '((avy-posframe . frog-menu-query-with-avy)
     (avy-side-window . frog-menu-query-with-avy))
-  "Maps `frog-menu-type' to a query handler.
+  "Maps variable `frog-menu-type' to a query handler.
 
 The query handler receives four arguments.
 
@@ -153,7 +153,7 @@ value. If the user exited the query return nil."
 (defcustom frog-menu-cleanup-handler-alist
   '((avy-posframe . frog-menu-posframe-hide)
     (avy-side-window . frog-menu-side-window-hide))
-  "Maps `frog-menu-type' to a cleanup handler.
+  "Maps variable `frog-menu-type' to a cleanup handler.
 
 The cleanup handler receives the displayed buffer and the window
 as arguments and is called after the query handler returns or
@@ -245,7 +245,7 @@ be drawn by single characters."
   "Buffer used for the frog menu.")
 
 (defun frog-menu-type ()
-  "Return `frog-menu-type' to use."
+  "Return variable `frog-menu-type' to use."
   (cond ((display-graphic-p)
          'avy-posframe)
         (t
@@ -286,7 +286,8 @@ PROMPT, STRINGS and ACTIONS are the args from `frog-menu-read'."
 (defun frog-menu-init-display-buffer (prompt formatted-strings formatted-actions)
   "Init handler for avy-posframe.
 
-PROMPT, FORMATTED-STRINGS and FORMATTED-ACTIONS are the args from `frog-menu-read'.
+PROMPT, FORMATTED-STRINGS and FORMATTED-ACTIONS are the args from
+`frog-menu-read'.
 
 Fills the buffer with a grid of FORMATTED-STRINGS followed by PROMPT and
 ACTIONS."
@@ -320,12 +321,14 @@ ACTIONS."
 ;; * Formatting
 
 (defun frog-menu-grid-format (strings)
+  "Format STRINGS to a grid."
     (frog-menu--grid-format
      strings
      (funcall frog-menu-grid-column-function)
      (funcall frog-menu-grid-width-function)))
 
 (defun frog-menu-action-format (actions)
+  "Format ACTIONS for menu display."
   (when actions
     (with-temp-buffer
       (let ((header-pos (point)))
@@ -398,6 +401,9 @@ Returns the buffer containing the formatted grid."
 (defun frog-menu-display-posframe (buf &optional display-option)
   "Display posframe showing buffer BUF.
 
+If given, DISPLAY-OPTION is passed as :poshandler to
+`posframe-show'.
+
 Returns window of displayed buffer."
   (posframe-show buf
                  :poshandler(or display-option
@@ -413,6 +419,9 @@ Returns window of displayed buffer."
 
 (defun frog-menu-display-side-window (buf &optional display-option)
   "Display posframe showing buffer BUF.
+
+If given DISPLAY-OPTION is passed as action argument to
+`display-buffer'.
 
 Returns window of displayed buffer."
   (let ((window (display-buffer
@@ -534,9 +543,9 @@ LEAF is normally ((BEG . END) . WND)."
 (defun frog-menu-query-with-avy (buffer window actions)
   "Query handler for avy-posframe.
 
-CANDIDATES are the candidates for `avy--process'. ACTIONS is the
-argument of `frog-menu-read'. BUFFER is the menu buffer which
-gets hidden after the query."
+Uses `avy' to query for candidates in BUFFER showing in WINDOW.
+
+ACTIONS is the argument of `frog-menu-read'."
   (let ((candidates (frog-menu--get-avy-candidates
                      buffer window)))
     ;; init map which passes actions info to avy handler
@@ -571,7 +580,7 @@ gets hidden after the query."
 
 ;;;###autoload
 (defun frog-menu-read (prompt strings &optional actions)
-  "Read from a menu of `frog-menu-type'.
+  "Read from a menu of variable `frog-menu-type'.
 
 PROMPT is a string with prompt information for the user.
 
