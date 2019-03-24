@@ -1,10 +1,10 @@
 ;;; frog-menu.el --- Quickly pick items from ad hoc menus  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2019  Clemens Radermacher
+;; Copyright (C) 2019  Free Software Foundation, Inc.
 
 ;; Author: Clemens Radermacher <clemera@posteo.net>
 ;; URL: https://github.com/clemera/frog-menu
-;; Version: 0.1
+;; Version: 0.1.1
 ;; Package-Requires: ((emacs "26") (avy) (posframe))
 ;; Keywords: convenience
 
