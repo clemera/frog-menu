@@ -548,7 +548,7 @@ gets hidden after the query."
 
 ;; * Entry point
 
-
+;;;###autoload
 (defun frog-menu-read (prompt strings &optional actions)
   "Read from a menu of `frog-menu-type'.
 
