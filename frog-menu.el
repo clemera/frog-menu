@@ -296,7 +296,9 @@ ACTIONS."
     (while (not (eobp))
       (goto-char (line-end-position))
       ;; Fix: assumes only one avy char...
-      (insert (concat " " (if frog-menu-avy-padding " " "")))
+      (insert (concat " "
+                      (make-string frog-menu-min-col-padding ?\s)
+                      (if frog-menu-avy-padding " " "")))
       (forward-line 1)))
   ;; posframe needs point at start,
   ;; otherwise it fails on first init
