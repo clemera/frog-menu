@@ -365,7 +365,7 @@ horizontal direction which default to frame width.
 
 Returns the buffer containing the formatted grid."
   (with-temp-buffer
-    (let* ((length (apply 'max
+    (let* ((length (apply #'max
                           (mapcar #'string-width strings)))
            (wwidth (or width (frame-width)))
            (columns (min cols (/ wwidth (+ frog-menu-min-col-padding length))))
@@ -492,13 +492,14 @@ buffer positions containing the candidates and default to
 
 (defun frog-menu--posframe-ace-handler (char)
   "Execute menu action for CHAR."
-  (cond ((memq char '(27 ?\C-g))
+  (cond ((memq char '(?\e ?\C-g))
          ;; exit silently
          (throw 'done 'exit))
         ((mouse-event-p char)
          (signal 'user-error (list "Mouse event not handled" char)))
         (t
          (require 'edmacro)
+         ;; FIXME: Why not `key-description'?
          (let* ((key (kbd (edmacro-format-keys (vector char))))
                 (cmd (lookup-key frog-menu--avy-action-map key)))
            (if (commandp cmd)
@@ -550,6 +551,8 @@ ACTIONS is the argument of `frog-menu-read'."
                      buffer window)))
     ;; init map which passes actions info to avy handler
     (frog-menu--init-avy-action-map actions)
+    ;; FIXME: These aren't found in my copy of avy!
+    (defvar avy-single-candidate-jump) (defvar avy-pre-action)
     (if candidates
         (let* ((avy-keys frog-menu-avy-keys)
                (avy-single-candidate-jump (null actions))
