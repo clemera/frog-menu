@@ -559,7 +559,7 @@ ACTIONS is the argument of `frog-menu-read'."
                (avy-all-windows nil)
                (avy-style 'pre)
                (avy-action #'identity)
-               (pos (avy-process
+               (pos (avy--process
                      candidates
                       #'frog-menu--avy-style)))
           (cond ((number-or-marker-p pos)
