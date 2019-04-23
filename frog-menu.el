@@ -588,6 +588,18 @@ ACTIONS is the argument of `frog-menu-read'."
 
 ;; * Entry point
 
+
+;;;###autoload
+(defun frog-menu-call (&rest cmds)
+  "Read a command from CMDS and execute it.
+
+CMDS is a list of command symbols to choose from."
+  (let ((cmd (intern-soft (frog-menu-read "" (mapcar #'symbol-name cmds)))))
+	(unless (commandp cmd)
+	  (user-error "%s is no a kown command" cmd))
+	(call-interactively cmd)))
+
+
 ;;;###autoload
 (defun frog-menu-read (prompt strings &optional actions)
   "Read from a menu of variable `frog-menu-type'.
