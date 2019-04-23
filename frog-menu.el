@@ -595,9 +595,7 @@ ACTIONS is the argument of `frog-menu-read'."
 
 CMDS is a list of command symbols to choose from."
   (let ((cmd (intern-soft (frog-menu-read "" (mapcar #'symbol-name cmds)))))
-	(unless (commandp cmd)
-	  (user-error "%s is no a kown command" cmd))
-	(call-interactively cmd)))
+	(command-execute cmd)))
 
 
 ;;;###autoload
