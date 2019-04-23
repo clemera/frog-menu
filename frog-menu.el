@@ -590,11 +590,14 @@ ACTIONS is the argument of `frog-menu-read'."
 
 
 ;;;###autoload
-(defun frog-menu-call (cmds)
+(defun frog-menu-call (cmds &optional prompt)
   "Read a command from CMDS and execute it.
 
-CMDS is a list of command symbols to choose from."
-  (let ((cmd (intern-soft (frog-menu-read "" (mapcar #'symbol-name cmds)))))
+CMDS is a list of command symbols to choose from.  If PROMPT is
+given it should be a string with prompt information for the
+user."
+  (let ((cmd (intern-soft (frog-menu-read (or prompt "")
+										  (mapcar #'symbol-name cmds)))))
 	(command-execute cmd)))
 
 
