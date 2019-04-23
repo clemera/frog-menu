@@ -590,10 +590,10 @@ ACTIONS is the argument of `frog-menu-read'."
 
 
 ;;;###autoload
-(defun frog-menu-call (&rest cmds)
+(defun frog-menu-call (cmds)
   "Read a command from CMDS and execute it.
 
-CMDS are command symbols to choose from."
+CMDS is a list of command symbols to choose from."
   (let ((cmd (intern-soft (frog-menu-read "" (mapcar #'symbol-name cmds)))))
 	(unless (commandp cmd)
 	  (user-error "%s is no a kown command" cmd))
