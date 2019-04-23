@@ -293,15 +293,19 @@ Fills the buffer with a grid of FORMATTED-STRINGS followed by PROMPT and
 ACTIONS."
   (when formatted-strings
     (insert formatted-strings)
-    (insert "\n\n"))
-  (add-text-properties
-   (point)
-   (progn
-     (insert prompt)
-     (point))
-   '(face frog-menu-prompt-face))
-  (insert "\n")
+    (insert "\n"))
+  (unless (string-empty-p prompt)
+	(insert "\n")
+	(add-text-properties
+	 (point)
+	 (progn
+       (insert prompt)
+       (point))
+	 '(face frog-menu-prompt-face))
+	(insert "\n"))
   (when formatted-actions
+	(when (string-empty-p prompt)
+	  (insert "\n"))
     (insert formatted-actions))
   (when formatted-strings
       ;; padding for avy char
@@ -313,6 +317,10 @@ ACTIONS."
                       (make-string frog-menu-min-col-padding ?\s)
                       (if frog-menu-avy-padding " " "")))
       (forward-line 1)))
+  ;; insert invisible char otherwise posframe
+  ;; hides second line when only two strings and
+  ;; no prompt, no actions
+  (insert " ")
   ;; posframe needs point at start,
   ;; otherwise it fails on first init
   (goto-char (point-min)))
