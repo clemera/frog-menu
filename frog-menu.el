@@ -295,17 +295,17 @@ ACTIONS."
     (insert formatted-strings)
     (insert "\n"))
   (unless (string-empty-p prompt)
-	(insert "\n")
-	(add-text-properties
-	 (point)
-	 (progn
+    (insert "\n")
+    (add-text-properties
+     (point)
+     (progn
        (insert prompt)
        (point))
-	 '(face frog-menu-prompt-face))
-	(insert "\n"))
+     '(face frog-menu-prompt-face))
+    (insert "\n"))
   (when formatted-actions
-	(when (string-empty-p prompt)
-	  (insert "\n"))
+    (when (string-empty-p prompt)
+      (insert "\n"))
     (insert formatted-actions))
   (when formatted-strings
       ;; padding for avy char
@@ -597,8 +597,8 @@ CMDS is a list of command symbols to choose from.  If PROMPT is
 given it should be a string with prompt information for the
 user."
   (let ((cmd (intern-soft (frog-menu-read (or prompt "")
-										  (mapcar #'symbol-name cmds)))))
-	(command-execute cmd)))
+                                          (mapcar #'symbol-name cmds)))))
+    (command-execute cmd)))
 
 
 ;;;###autoload
