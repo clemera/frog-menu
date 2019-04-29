@@ -292,10 +292,9 @@ PROMPT, FORMATTED-STRINGS and FORMATTED-ACTIONS are the args from
 Fills the buffer with a grid of FORMATTED-STRINGS followed by PROMPT and
 ACTIONS."
   (when formatted-strings
-    (insert formatted-strings)
-    (insert "\n"))
+    (insert formatted-strings))
   (unless (string-empty-p prompt)
-    (insert "\n")
+    (insert "\n\n")
     (add-text-properties
      (point)
      (progn
@@ -305,25 +304,8 @@ ACTIONS."
     (insert "\n"))
   (when formatted-actions
     (when (string-empty-p prompt)
-      (insert "\n"))
+        (insert "\n\n"))
     (insert formatted-actions))
-  (when formatted-strings
-      ;; padding for avy char
-    (goto-char (point-min))
-    (while (not (eobp))
-      (goto-char (line-end-position))
-      ;; Fix: assumes only one avy char...
-      (insert (concat " "
-                      (make-string frog-menu-min-col-padding ?\s)
-                      (if frog-menu-avy-padding " " "")))
-      (forward-line 1)))
-  ;; insert invisible char otherwise posframe hides second line when only two
-  ;; strings and no prompt, no actions,
-  (insert
-   (propertize "_"
-               'face
-               (list :foreground
-                 (face-background 'frog-menu-posframe-background-face nil t))))
   ;; posframe needs point at start,
   ;; otherwise it fails on first init
   (goto-char (point-min)))
