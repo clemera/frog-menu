@@ -294,7 +294,8 @@ ACTIONS."
   (when formatted-strings
     (insert formatted-strings))
   (unless (string-empty-p prompt)
-    (insert "\n\n")
+    (when formatted-strings
+      (insert "\n\n"))
     (add-text-properties
      (point)
      (progn
@@ -303,8 +304,9 @@ ACTIONS."
      '(face frog-menu-prompt-face))
     (insert "\n"))
   (when formatted-actions
-    (when (string-empty-p prompt)
-        (insert "\n\n"))
+    (when (and formatted-strings
+               (string-empty-p prompt))
+      (insert "\n\n"))
     (insert formatted-actions))
   ;; posframe needs point at start,
   ;; otherwise it fails on first init
