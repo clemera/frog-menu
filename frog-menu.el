@@ -504,8 +504,7 @@ buffer positions containing the candidates and default to
                 (f (lookup-key frog-menu--avy-action-map key)))
            (if (functionp f)
                (throw 'done (list f))
-             (message "No such candidate: %s, hit `C-g' to quit."
-                      (if (characterp char) (string char) char))
+             (message "No such candidate, hit `C-g' to quit.")
              (throw 'done 'restart))))))
 
 (defun frog-menu--init-avy-action-map (actions)
@@ -554,9 +553,12 @@ ACTIONS is the argument of `frog-menu-read'."
                 ((functionp pos)
                  ;; action
                  (funcall pos))))
-      (let ((f (lookup-key frog-menu--avy-action-map (vector (read-char)))))
-        (when (functionp f)
-          (funcall f))))))
+      (let ((f nil))
+        (while (not f)
+          (unless (setq f (lookup-key frog-menu--avy-action-map
+                                      (vector (read-char))))
+            (message "No such action, hit C-g to quit.")))
+        (funcall f)))))
 
 
 ;; * Entry point
@@ -629,3 +631,4 @@ RETURN will be the returned value if KEY is pressed."
 
 (provide 'frog-menu)
 ;;; frog-menu.el ends here
+
