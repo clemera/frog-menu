@@ -515,7 +515,9 @@ action result. ACTIONS is the argument of `frog-menu-read'."
   (setq frog-menu--avy-action-map (make-sparse-keymap))
   (dolist (action actions)
     (define-key frog-menu--avy-action-map (kbd (car action))
-      (lambda () (car (cddr action))))))
+      (lambda () (car (cddr action)))))
+  ;; space must not be used by actions
+  (define-key frog-menu--avy-action-map "\t" 'frog-menu--complete))
 
 (defun frog-menu-query-with-avy (buffer window actions)
   "Query handler for avy-posframe.
@@ -550,6 +552,9 @@ ACTIONS is the argument of `frog-menu-read'."
                      ;; get rid of the padding
                      (replace-regexp-in-string
                       "\\`_ *" "" (buffer-substring start end)))))
+                ((eq pos 'frog-menu--complete)
+                 ;; switch to completion from `frog-menu-read'
+                 pos)
                 ((functionp pos)
                  ;; action
                  (funcall pos))))
@@ -562,6 +567,18 @@ ACTIONS is the argument of `frog-menu-read'."
 
 
 ;; * Entry point
+
+(defun frog-menu--complete (prompt collection &rest args)
+  "PROMPT for `completing-read' COLLECTION.
+
+Remaining ARGS are passed to `completing-read'. PROMPT and
+COLLECTION are the arguments from `frog-menu-read'."
+  (apply #'completing-read
+         ;; make sure prompt is "completing readable"
+         (if (string-empty-p prompt)
+             ": "
+           (replace-regexp-in-string "\\(: ?\\)?\\'" ": " prompt))
+         collection args))
 
 
 ;;;###autoload
@@ -584,7 +601,8 @@ PROMPT is a string with prompt information for the user.
 
 COLLECTION is a list from which the user can choose an item. It
 can be a list of strings or an alist mapping strings to return
-values.
+values. Users can switch to `completing-read' from COLLECTION
+using the TAB key.
 
 ACTIONS is an additional list of actions that can be given to let
 the user choose an action instead an item from COLLECTION.
@@ -603,11 +621,12 @@ RETURN will be the returned value if KEY is pressed."
   (let* ((frog-menu-type (funcall frog-menu-type-function))
          (convf (and collection (consp (car collection))
                      #'car))
+         (strings (if convf
+                      (mapcar convf collection)
+                    collection))
          (buf (frog-menu--init-buffer (get-buffer-create frog-menu--buffer)
                                       prompt
-                                      (if convf
-                                          (mapcar convf collection)
-                                        collection)
+                                      strings
                                       actions))
          (dhandler (cdr (assq frog-menu-type
                               frog-menu-display-handler-alist)))
@@ -623,6 +642,8 @@ RETURN will be the returned value if KEY is pressed."
         (setq res (funcall qhandler buf window actions))
       (when cuhandler
         (funcall cuhandler buf window)))
+    (when (eq res 'frog-menu--complete)
+      (setq res (frog-menu--complete prompt strings)))
     (cond ((eq convf #'car)
            (cdr (assoc res collection)))
           (t res))))
@@ -631,4 +652,7 @@ RETURN will be the returned value if KEY is pressed."
 
 (provide 'frog-menu)
 ;;; frog-menu.el ends here
+
+
+
 
