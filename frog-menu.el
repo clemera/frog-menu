@@ -316,7 +316,14 @@ ACTIONS."
 (defun frog-menu-grid-format (strings)
   "Format STRINGS to a grid."
     (frog-menu--grid-format
-     strings
+     (mapcar (lambda (str)
+               (concat (propertize
+                        "_"
+                        'face (list :foreground
+                                (face-background
+                                 'frog-menu-posframe-background-face nil t)))
+                       (if frog-menu-avy-padding " " "")
+                       str)) strings)
      (funcall frog-menu-grid-column-function)
      (funcall frog-menu-grid-width-function)))
 
@@ -509,29 +516,6 @@ action result. ACTIONS is the argument of `frog-menu-read'."
     (define-key frog-menu--avy-action-map (kbd (car action))
       (lambda () (interactive) (car (cddr action))))))
 
-(defun frog-menu--avy-style (path leaf)
-  "Create an overlay with PATH at LEAF.
-PATH is a list of keys from tree root to LEAF.
-LEAF is normally ((BEG . END) . WND)."
-  (let* ((path (mapcar #'avy--key-to-char path))
-         (str (propertize (apply #'string (reverse path))
-                          'face 'avy-lead-face)))
-    (when (or avy-highlight-first (> (length str) 1))
-      (set-text-properties 0 1 '(face avy-lead-face-0) str))
-    (setq str (concat
-               (propertize avy-current-path
-                           'face 'avy-lead-face-1)
-               str))
-    (avy--overlay
-     str
-     (avy-candidate-beg leaf) nil
-     (avy-candidate-wnd leaf)
-     (lambda (str old-str)
-       (concat str
-               (if frog-menu-avy-padding " " "")
-               old-str)))))
-
-
 (defun frog-menu-query-with-avy (buffer window actions)
   "Query handler for avy-posframe.
 
@@ -550,19 +534,21 @@ ACTIONS is the argument of `frog-menu-read'."
                (avy-handler-function #'frog-menu--posframe-ace-handler)
                (avy-pre-action #'ignore)
                (avy-all-windows nil)
-               (avy-style 'pre)
+               (avy-style 'at-full)
                (avy-action #'identity)
                (pos (with-selected-window window
                       (avy--process
                        candidates
-                       #'frog-menu--avy-style))))
+                       (avy--style-fn avy-style)))))
           (cond ((number-or-marker-p pos)
                  ;; string
                  (with-current-buffer buffer
                    (let* ((start pos)
                           (end (or (next-single-property-change start 'face)
                                    (point-max))))
-                     (buffer-substring start end))))
+                     ;; get rid of the padding
+                     (replace-regexp-in-string
+                      "\\`_ *" "" (buffer-substring start end)))))
                 ((commandp pos)
                  ;; action
                  (call-interactively pos))))
