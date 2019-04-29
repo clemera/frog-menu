@@ -317,10 +317,13 @@ ACTIONS."
                       (make-string frog-menu-min-col-padding ?\s)
                       (if frog-menu-avy-padding " " "")))
       (forward-line 1)))
-  ;; insert invisible char otherwise posframe
-  ;; hides second line when only two strings and
-  ;; no prompt, no actions
-  (insert " ")
+  ;; insert invisible char otherwise posframe hides second line when only two
+  ;; strings and no prompt, no actions,
+  (insert
+   (propertize "_"
+               'face
+               (list :foreground
+                 (face-background 'frog-menu-posframe-background-face nil t))))
   ;; posframe needs point at start,
   ;; otherwise it fails on first init
   (goto-char (point-min)))
