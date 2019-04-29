@@ -575,16 +575,17 @@ user."
 
 
 ;;;###autoload
-(defun frog-menu-read (prompt strings &optional actions)
+(defun frog-menu-read (prompt collection &optional actions)
   "Read from a menu of variable `frog-menu-type'.
 
 PROMPT is a string with prompt information for the user.
 
-STRINGS is a list of strings from which the user is expected to
-choose one.
+COLLECTION is a list from which the user can choose an item. It
+can be a list of strings or an alist mapping strings to return
+values.
 
 ACTIONS is an additional list of actions that can be given to let
-the user choose an action instead of returning a chosen string.
+the user choose an action instead an item from COLLECTION.
 
 Each ACTION is a list of the form:
 
@@ -598,8 +599,14 @@ describe the action.
 
 RETURN will be the returned value if KEY is pressed."
   (let* ((frog-menu-type (funcall frog-menu-type-function))
+         (convf (and collection (consp (car collection))
+                     #'car))
          (buf (frog-menu--init-buffer (get-buffer-create frog-menu--buffer)
-                                      prompt strings actions))
+                                      prompt
+                                      (if convf
+                                          (mapcar convf collection)
+                                        collection)
+                                      actions))
          (dhandler (cdr (assq frog-menu-type
                               frog-menu-display-handler-alist)))
          (doption (cdr (assq frog-menu-type
@@ -614,7 +621,9 @@ RETURN will be the returned value if KEY is pressed."
         (setq res (funcall qhandler buf window actions))
       (when cuhandler
         (funcall cuhandler buf window)))
-    res))
+    (cond ((eq convf #'car)
+           (cdr (assoc res collection)))
+          (t res))))
 
 
 
