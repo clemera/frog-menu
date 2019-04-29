@@ -499,9 +499,9 @@ buffer positions containing the candidates and default to
          (signal 'user-error (list "Mouse event not handled" char)))
         (t
          (let* ((key (kbd (key-description (vector char))))
-                (cmd (lookup-key frog-menu--avy-action-map key)))
-           (if (commandp cmd)
-               (throw 'done (list cmd))
+                (f (lookup-key frog-menu--avy-action-map key)))
+           (if (functionp f)
+               (throw 'done (list f))
              (message "No such candidate: %s, hit `C-g' to quit."
                       (if (characterp char) (string char) char))
              (throw 'done 'restart))))))
@@ -514,7 +514,7 @@ action result. ACTIONS is the argument of `frog-menu-read'."
   (setq frog-menu--avy-action-map (make-sparse-keymap))
   (dolist (action actions)
     (define-key frog-menu--avy-action-map (kbd (car action))
-      (lambda () (interactive) (car (cddr action))))))
+      (lambda () (car (cddr action))))))
 
 (defun frog-menu-query-with-avy (buffer window actions)
   "Query handler for avy-posframe.
@@ -549,12 +549,12 @@ ACTIONS is the argument of `frog-menu-read'."
                      ;; get rid of the padding
                      (replace-regexp-in-string
                       "\\`_ *" "" (buffer-substring start end)))))
-                ((commandp pos)
+                ((functionp pos)
                  ;; action
-                 (call-interactively pos))))
-      (let ((cmd (lookup-key frog-menu--avy-action-map (vector (read-char)))))
-        (when (commandp cmd)
-          (call-interactively cmd))))))
+                 (funcall pos))))
+      (let ((f (lookup-key frog-menu--avy-action-map (vector (read-char)))))
+        (when (functionp f)
+          (funcall f))))))
 
 
 ;; * Entry point
