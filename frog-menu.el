@@ -358,6 +358,7 @@ ACTIONS."
             (replace-match " "))))
       (buffer-string))))
 
+;; Taken partly from `completion--insert-strings'
 (defun frog-menu--grid-format (strings cols &optional width)
   "Return grid string built with STRINGS.
 
@@ -365,7 +366,7 @@ The grid will be segmented into columns. COLS is the maximum
 number of columns to use. The columns have WIDTH space in
 horizontal direction which default to frame width.
 
-Returns the buffer containing the formatted grid."
+Returns the formatted grid string."
   (with-temp-buffer
     (let* ((length (apply #'max
                           (mapcar #'string-width strings)))
@@ -374,27 +375,53 @@ Returns the buffer containing the formatted grid."
            (colwidth (/ wwidth columns))
            (column 0)
            (first t)
-           laststring)
+           (rows (/ (length strings) columns))
+           (row 0))
       (dolist (str strings)
-        (unless (equal laststring str)
-          (setq laststring str)
-          (let ((length (string-width str)))
-            (unless first
-              (if (or (< wwidth (+ (max colwidth length) column))
-                      (zerop length))
-                  (progn
-                    (insert "\n" (if (zerop length) "\n" ""))
-                    (setq column 0))
-                (insert " \t")
-                (set-text-properties (1- (point)) (point)
-                                     `(display (space :align-to ,column)))))
-            (setq first (zerop length))
-            (add-text-properties (point)
-                                 (progn (insert str)
-                                        (point))
-                                 '(face frog-menu-candidates-face))
-            (setq column (+ column
-                            (* colwidth (ceiling length colwidth)))))))
+        (let ((length (string-width str)))
+          (cond ((eq frog-menu-format 'vertical)
+                 ;; Vertical format
+                 (when (> row rows)
+                   (forward-line (- -1 rows))
+                   (setq row 0 column (+ column colwidth)))
+                 (when (> column 0)
+                   (end-of-line)
+                   (while (> (current-column) column)
+                     (if (eobp)
+                         (insert "\n")
+                       (forward-line 1)
+                       (end-of-line)))
+                   (insert " \t")
+                   (set-text-properties (1- (point)) (point)
+                                        `(display (space :align-to ,column))))
+
+                 (add-text-properties (point)
+                                      (progn (insert str)
+                                             (point))
+                                      '(face frog-menu-candidates-face))
+
+                 (if (> column 0)
+                     (forward-line)
+                   (insert "\n"))
+                 (setq row (1+ row)))
+                (t
+                 ;; horizontal
+                 (unless first
+                   (if (or (< wwidth (+ (max colwidth length) column))
+                           (zerop length))
+                       (progn
+                         (insert "\n" (if (zerop length) "\n" ""))
+                         (setq column 0))
+                     (insert " \t")
+                     (set-text-properties (1- (point)) (point)
+                                          `(display (space :align-to ,column)))))
+                 (setq first (zerop length))
+                 (add-text-properties (point)
+                                      (progn (insert str)
+                                             (point))
+                                      '(face frog-menu-candidates-face))
+                 (setq column (+ column
+                                 (* colwidth (ceiling length colwidth))))))))
       (buffer-string))))
 
 
@@ -600,6 +627,14 @@ pass the strings to be displayed and the function to `sort':
 
     (let ((frog-menu-sort-function #'string<))
       (frog-menu-read \"Example\" '(\"z\" \"a\")))")
+
+(defvar frog-menu-format completions-format
+  "Defines in which order strings for `frog-menu-read' are displayed.
+
+If the value is `vertical', strings are ordered vertically. If
+the value is `horizontal', strings are ordered horizontally. This
+variable does not define sorting, see `frog-menu-sort-function'
+for this.")
 
 
 ;;;###autoload
