@@ -592,6 +592,15 @@ user."
                                           (mapcar #'symbol-name cmds)))))
     (command-execute cmd)))
 
+(defvar frog-menu-sort-function nil
+  "A function to sort displayed strings for `frog-menu-read'.
+
+If this variable is bound to a function `frog-menu-read' will
+pass the strings to be displayed and the function to `sort':
+
+    (let ((frog-menu-sort-function #'string<))
+      (frog-menu-read \"Example\" '(\"z\" \"a\")))")
+
 
 ;;;###autoload
 (defun frog-menu-read (prompt collection &optional actions)
@@ -602,7 +611,8 @@ PROMPT is a string with prompt information for the user.
 COLLECTION is a list from which the user can choose an item. It
 can be a list of strings or an alist mapping strings to return
 values. Users can switch to `completing-read' from COLLECTION
-using the TAB key.
+using the TAB key. For sorting the displayed strings see
+`frog-menu-sort-function'.
 
 ACTIONS is an additional list of actions that can be given to let
 the user choose an action instead an item from COLLECTION.
@@ -624,6 +634,9 @@ RETURN will be the returned value if KEY is pressed."
          (strings (if convf
                       (mapcar convf collection)
                     collection))
+         (strings (if frog-menu-sort-function
+                      (sort strings frog-menu-sort-function)
+                    strings))
          (buf (frog-menu--init-buffer (get-buffer-create frog-menu--buffer)
                                       prompt
                                       strings
