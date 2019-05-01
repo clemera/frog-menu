@@ -607,6 +607,14 @@ COLLECTION are the arguments from `frog-menu-read'."
            (replace-regexp-in-string "\\(: ?\\)?\\'" ": " prompt))
          collection args))
 
+(defun frog-menu-completing-read-function (prompt collection &rest _)
+  "Can be used as `completing-read-function'
+
+For now all arguments other than PROMPT and COLLECTION are
+ignored. COLLECTION has to use a format `frog-menu-read' can
+understand."
+  (frog-menu-read prompt collection))
+
 
 ;;;###autoload
 (defun frog-menu-call (cmds &optional prompt)
