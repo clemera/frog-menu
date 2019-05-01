@@ -322,8 +322,10 @@ ACTIONS."
                (concat (propertize
                         "_"
                         'face (list :foreground
-                                (face-background
-                                 'frog-menu-posframe-background-face nil t)))
+                                (if (eq (funcall frog-menu-type-function) 'avy-posframe)
+                                    (face-background
+                                     'frog-menu-posframe-background-face nil t)
+                                  (face-background 'default))))
                        (if frog-menu-avy-padding " " "")
                        str)) strings)
      (funcall frog-menu-grid-column-function)
