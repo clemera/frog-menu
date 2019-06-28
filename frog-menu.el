@@ -373,7 +373,9 @@ Returns the formatted grid string."
     (let* ((length (apply #'max
                           (mapcar #'string-width strings)))
            (wwidth (or width (frame-width)))
-           (columns (min cols (/ wwidth (+ frog-menu-min-col-padding length))))
+           (columns (max 1 (min cols
+                                (/ wwidth
+                                   (+ frog-menu-min-col-padding length)))))
            (colwidth (/ wwidth columns))
            (column 0)
            (first t)
