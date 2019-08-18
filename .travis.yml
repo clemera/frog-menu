@@ -1,5 +1,9 @@
 dist: trusty
 sudo: required
+addons:
+  apt:
+    packages:
+      - texinfo
 env:
   - EMACS_VERSION=26.1-travis
   - EMACS_VERSION=git-snapshot
