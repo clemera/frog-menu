@@ -2,7 +2,7 @@ EMACS ?= emacs
 
 package_files := $(wildcard *.el)
 test_files := $(wildcard test/*.el)
-package_lint  := ../package-lint/package-lint.el
+package_lint  := ~/package-lint/package-lint.el
 
 .PHONY: all
 all: compile checkdoc lint test
