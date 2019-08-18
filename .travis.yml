@@ -1,15 +1,15 @@
 dist: trusty
 sudo: required
-addons:
-  apt:
-    packages:
-      - texinfo
+# addons:
+#   apt:
+#     packages:
+#       - texinfo
 env:
   - EMACS_VERSION=26.1-travis
-  - EMACS_VERSION=git-snapshot
-matrix:
-  allow_failures:
-    - env: EMACS_VERSION=git-snapshot
+  # - EMACS_VERSION=git-snapshot
+# matrix:
+#   allow_failures:
+#     - env: EMACS_VERSION=git-snapshot
 install:
   - git clone https://github.com/purcell/package-lint.git ~/package-lint
   - git clone --depth 1 https://github.com/rejeep/evm.git ~/.evm
