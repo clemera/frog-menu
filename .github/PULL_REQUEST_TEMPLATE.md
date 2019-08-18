@@ -1,0 +1,16 @@
+This package is subject to the
+[[https://www.gnu.org/prep/maintain/html_node/Copyright-Papers.html][Copyright Assignment]]
+policy of [[https://elpa.gnu.org/packages/][GNU ELPA]] packages.
+
+Any [[https://www.gnu.org/prep/maintain/html_node/Legally-Significant.html#Legally-Significant][legally significant]]
+contributions can only be accepted after the author has completed their paperwork. Please see
+[[https://git.savannah.gnu.org/cgit/gnulib.git/tree/doc/Copyright/request-assign.future][the request form]]
+if you want to proceed with the assignment.
+
+If your changes are below 15 lines I can add your changes without assignment. If
+your contribution is bigger than 15 line and you don't want to assign you should
+still open a PR and I will consider adding the changes myself.
+
+Please confirm with `x`:
+
+- [ ] I have signed the copyright paperwork for contributing to GNU ELPA packages.
