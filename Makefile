@@ -32,6 +32,7 @@ lint:
 		echo "[package-lint] $$file" ;\
 		$(EMACS) -Q --batch \
 			-l $(package_lint) \
+			--eval "(defalias 'package-lint--check-packages-installable #'ignore)" \
 			-f package-lint-batch-and-exit $$file ;\
 	done
 
