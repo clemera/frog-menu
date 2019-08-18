@@ -64,6 +64,8 @@
 
 (require 'avy)
 (require 'posframe)
+(eval-when-compile
+  (require 'subr-x))
 
 (defgroup frog-menu nil
   "Quickly pick items from ad hoc menus."
@@ -217,6 +219,23 @@ By default uses a large collection of keys, so that the hints can
 be drawn by single characters."
   :type '(repeat character))
 
+(defvar frog-menu-sort-function nil
+  "A function to sort displayed strings for `frog-menu-read'.
+
+If this variable is bound to a function `frog-menu-read' will
+pass the strings to be displayed and the function to `sort':
+
+    (let ((frog-menu-sort-function #'string<))
+      (frog-menu-read \"Example\" '(\"z\" \"a\")))")
+
+(defvar frog-menu-format completions-format
+  "Defines in which order strings for `frog-menu-read' are displayed.
+
+If the value is `vertical', strings are ordered vertically. If
+the value is `horizontal', strings are ordered horizontally. This
+variable does not define sorting, see `frog-menu-sort-function'
+for this.")
+
 (defface frog-menu-border '((((background dark))  . (:background "white"))
                             (((background light)) . (:background "black")))
   "The face defining the border for the posframe.")
@@ -283,7 +302,9 @@ PROMPT, STRINGS and ACTIONS are the args from `frog-menu-read'."
   (delete-window window))
 
 
-(defun frog-menu-init-display-buffer (prompt formatted-strings formatted-actions)
+(defun frog-menu-init-display-buffer (prompt
+                                      formatted-strings
+                                      formatted-actions)
   "Init handler for avy-posframe.
 
 PROMPT, FORMATTED-STRINGS and FORMATTED-ACTIONS are the args from
@@ -322,7 +343,8 @@ ACTIONS."
                (concat (propertize
                         "_"
                         'face (list :foreground
-                                (if (eq (funcall frog-menu-type-function) 'avy-posframe)
+                                (if (eq (funcall frog-menu-type-function)
+                                        'avy-posframe)
                                     (face-background
                                      'frog-menu-posframe-background-face nil t)
                                   (face-background 'default))))
@@ -417,8 +439,10 @@ Returns the formatted grid string."
                          (insert "\n" (if (zerop length) "\n" ""))
                          (setq column 0))
                      (insert " \t")
-                     (set-text-properties (1- (point)) (point)
-                                          `(display (space :align-to ,column)))))
+                     (set-text-properties
+                      (1- (point))
+                      (point)
+                      `(display (space :align-to ,column)))))
                  (setq first (zerop length))
                  (add-text-properties (point)
                                       (progn (insert str)
@@ -442,7 +466,9 @@ Returns window of displayed buffer."
                  :poshandler(or display-option
                                 #'posframe-poshandler-point-bottom-left-corner)
                  :internal-border-width 1
-                 :background-color (face-attribute 'frog-menu-posframe-background-face :background)
+                 :background-color (face-attribute
+                                    'frog-menu-posframe-background-face
+                                    :background)
                  :override-parameters frog-menu-posframe-parameters)
   (set-face-attribute 'internal-border
                       (buffer-local-value 'posframe--frame buf)
@@ -612,7 +638,7 @@ COLLECTION are the arguments from `frog-menu-read'."
          collection args))
 
 (defun frog-menu-completing-read-function (prompt collection &rest _)
-  "Can be used as `completing-read-function'
+  "Can be used as `completing-read-function'.
 
 For now all arguments other than PROMPT and COLLECTION are
 ignored. COLLECTION has to use a format `frog-menu-read' can
@@ -630,23 +656,6 @@ user."
   (let ((cmd (intern-soft (frog-menu-read (or prompt "")
                                           (mapcar #'symbol-name cmds)))))
     (command-execute cmd)))
-
-(defvar frog-menu-sort-function nil
-  "A function to sort displayed strings for `frog-menu-read'.
-
-If this variable is bound to a function `frog-menu-read' will
-pass the strings to be displayed and the function to `sort':
-
-    (let ((frog-menu-sort-function #'string<))
-      (frog-menu-read \"Example\" '(\"z\" \"a\")))")
-
-(defvar frog-menu-format completions-format
-  "Defines in which order strings for `frog-menu-read' are displayed.
-
-If the value is `vertical', strings are ordered vertically. If
-the value is `horizontal', strings are ordered horizontally. This
-variable does not define sorting, see `frog-menu-sort-function'
-for this.")
 
 
 ;;;###autoload
