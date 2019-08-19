@@ -2,10 +2,10 @@ EMACS ?= emacs
 
 package_files := $(wildcard *.el)
 test_files := $(wildcard test/*.el)
-package_lint  := ../package-lint/package-lint.el
+package_lint  := ~/package-lint/package-lint.el
 
 .PHONY: all
-all: compile checkdoc lint test
+all: compile checkdoc lint test itest
 
 .PHONY: compile
 compile:
@@ -32,6 +32,7 @@ lint:
 		echo "[package-lint] $$file" ;\
 		$(EMACS) -Q --batch \
 			-l $(package_lint) \
+			--eval "(defalias 'package-lint--check-packages-installable #'ignore)" \
 			-f package-lint-batch-and-exit $$file ;\
 	done
 
@@ -43,6 +44,13 @@ test:
 			-l $$file \
 			-f ert-run-tests-batch-and-exit ;\
 	done
+
+.PHONY: itest
+itest:
+	@if emacsclient -a false -e 't' 1>/dev/null 2>/dev/null; then \
+		echo "[interactive-test]" ;\
+		emacsclient --eval "(load-file \"test/frog-menu-test.el\")" ;\
+	fi
 
 .PHONY: clean
 clean:

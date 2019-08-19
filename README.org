@@ -1,3 +1,11 @@
+#+BEGIN_HTML
+<p>
+<a href="https://elpa.gnu.org/packages/frog-menu.html"><img alt="GNU ELPA" src="https://elpa.gnu.org/favicon.png"/></a>
+<a href="https://travis-ci.com/clemera/frog-menu"><img alt="Travis CI" src="https://travis-ci.com/clemera/frog-menu.svg?branch=master"/></a>
+</p>
+#+END_HTML
+
+
 * Description
 
 This package lets you quickly pick strings from ad hoc menus. Just like a frog
