@@ -5,7 +5,7 @@ test_files := $(wildcard test/*.el)
 package_lint  := ~/package-lint/package-lint.el
 
 .PHONY: all
-all: compile checkdoc lint test
+all: compile checkdoc lint test itest
 
 .PHONY: compile
 compile:
@@ -44,6 +44,13 @@ test:
 			-l $$file \
 			-f ert-run-tests-batch-and-exit ;\
 	done
+
+.PHONY: itest
+itest:
+	@if emacsclient -a false -e 't' 1>/dev/null 2>/dev/null; then \
+		echo "[interactive-test]" ;\
+		emacsclient --eval "(load-file \"test/frog-menu-test.el\")" ;\
+	fi
 
 .PHONY: clean
 clean:
