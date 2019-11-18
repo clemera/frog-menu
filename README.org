@@ -87,21 +87,13 @@ And here is yet another example I use to navigate the menubar:
          (lambda (item)
            (eq (cddr item) 'ignore)) tmm-km-list)))
 
-(defun frog-tmm ()
-  "Adapted from `counsel-tmm'."
-  (interactive)
-  (run-hooks 'menu-bar-update-hook)
-  (setq tmm-table-undef nil)
-  (frog-tmm-prompt (tmm-get-keybind [menu-bar])))
-
-
-(defun frog-tmm-prompt (menu)
+(defun frog-tmm-prompt (menu &optional item)
   "Adapted from `counsel-tmm-prompt'."
   (let (out
         choice
         chosen-string)
     (setq tmm-km-list (tmm-init-km-list+ menu))
-    (setq out (frog-menu-read "Menu: " (mapcar #'car tmm-km-list)))
+    (setq out (or item (frog-menu-read "Menu: " (mapcar #'car tmm-km-list))))
     (setq choice (cdr (assoc out tmm-km-list)))
     (setq chosen-string (car choice))
     (setq choice (cdr choice))
@@ -110,4 +102,18 @@ And here is yet another example I use to navigate the menubar:
           ((and choice chosen-string)
            (setq last-command-event chosen-string)
            (call-interactively choice)))))
+
+(defun frog-tmm ()
+  "Adapted from `counsel-tmm'."
+  (interactive)
+  (run-hooks 'menu-bar-update-hook)
+  (setq tmm-table-undef nil)
+  (frog-tmm-prompt (tmm-get-keybind [menu-bar])))
+
+(defun frog-tmm-mode (&optional mode)
+  "Adapted from `counsel-tmm'."
+  (interactive)
+  (run-hooks 'menu-bar-update-hook)
+  (setq tmm-table-undef nil)
+  (frog-tmm-prompt (tmm-get-keybind [menu-bar]) mode-name))
 #+end_src
