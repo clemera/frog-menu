@@ -115,5 +115,5 @@ And here is yet another example I use to navigate the menubar:
   (interactive)
   (run-hooks 'menu-bar-update-hook)
   (setq tmm-table-undef nil)
-  (frog-tmm-prompt (tmm-get-keybind [menu-bar]) mode-name))
+  (frog-tmm-prompt (tmm-get-keybind [menu-bar]) (or mode mode-name)))
 #+end_src
