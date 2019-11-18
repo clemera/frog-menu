@@ -77,6 +77,8 @@ Afterwards calling =M-x flyspell-correct-wrapper= will prompt you with a
 And here is yet another example I use to navigate the menubar:
 
 #+begin_src elisp
+(require 'tmm)
+
 (defun tmm-init-km-list+ (menu)
   (setq tmm-km-list nil)
   (map-keymap (lambda (k v) (tmm-get-keymap (cons k v))) menu)
