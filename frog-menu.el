@@ -167,6 +167,10 @@ exits through an error."
   "If non-nil use padding between avy hints and candidates."
   :type 'boolean)
 
+(defcustom frog-menu-posframe-border-width 1
+  "Border width to use for the posframe `frog-menu' creates."
+  :type 'integer)
+
 (defcustom frog-menu-posframe-parameters nil
   "Explicit frame parameters to be used by the posframe `frog-menu' creates."
   :type 'list)
@@ -465,7 +469,7 @@ Returns window of displayed buffer."
   (posframe-show buf
                  :poshandler(or display-option
                                 #'posframe-poshandler-point-bottom-left-corner)
-                 :internal-border-width 1
+                 :internal-border-width frog-menu-posframe-border-width
                  :background-color (face-attribute
                                     'frog-menu-posframe-background-face
                                     :background)
