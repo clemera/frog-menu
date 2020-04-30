@@ -688,9 +688,9 @@ COLLECTION and PREDICATE should have the format as specified by
             (lambda (key val)
               (unless (and predicate
                            (funcall predicate key val))
-                (push (if (symbolp el)
-                           (symbol-name el)
-                         el)
+                (push (if (symbolp key)
+                           (symbol-name key)
+                         key)
                       strings)))
             collection)
            (nreverse strings)))
