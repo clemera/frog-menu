@@ -23,6 +23,7 @@
 (defvar avy-style nil)
 (defvar avy-action nil)
 
+(defun avy-process (candidates overlay-fn))
 (defun avy--process (candidates overlay-fn))
 (defun avy--style-fn (style))
 
