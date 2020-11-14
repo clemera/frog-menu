@@ -759,7 +759,7 @@ RETURN will be the returned value if KEY is pressed."
         (funcall cuhandler buf window)))
     (when (eq res 'frog-menu--complete)
       (setq res (frog-menu--complete prompt strings)))
-    (cond ((eq convf #'car)
+    (cond ((and (eq convf #'car) (stringp res))
            (cdr (assoc res collection)))
           (t res))))
 
@@ -767,7 +767,3 @@ RETURN will be the returned value if KEY is pressed."
 
 (provide 'frog-menu)
 ;;; frog-menu.el ends here
-
-
-
-
