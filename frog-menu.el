@@ -261,7 +261,7 @@ for this.")
   "Face used for menu action keybindings.")
 
 (defface frog-menu-posframe-background-face
-  '((t :background "old lace"))
+  '((t (:inherit default)))
   "Face used for the background color of the posframe.")
 
 (defvar frog-menu--buffer " *frog-menu-menu*"
