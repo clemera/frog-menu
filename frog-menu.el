@@ -470,6 +470,9 @@ Returns window of displayed buffer."
                  :poshandler(or display-option
                                 #'posframe-poshandler-point-bottom-left-corner)
                  :internal-border-width frog-menu-posframe-border-width
+                 :internal-border-color (face-attribute
+                                         'frog-menu-border
+                                         :background)
                  :background-color (face-attribute
                                     'frog-menu-posframe-background-face
                                     :background)
@@ -770,7 +773,3 @@ RETURN will be the returned value if KEY is pressed."
 
 (provide 'frog-menu)
 ;;; frog-menu.el ends here
-
-
-
-
